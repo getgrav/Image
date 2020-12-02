@@ -12,9 +12,9 @@
         }
     ],
     "require": {
-        "php": "^5.3 || ^7.0",
+        "php": "^5.3 || ^7.0 || ^8.0",
         "ext-gd": "*",
-        "gregwar/cache": "^1.0.6"
+        "gregwar/cache": "dev-php8"
     },
     "require-dev": {
         "sllh/php-cs-fixer-styleci-bridge": "~1.0",
@@ -23,6 +23,12 @@
     "suggest": {
         "behat/transliterator": "Transliterator provides ability to set non-latin1 pretty names"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/getgrav/Cache"
+        }
+    ],
     "target-dir": "Gregwar/Image",
     "autoload": {
         "psr-0": {
