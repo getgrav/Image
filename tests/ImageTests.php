@@ -1,5 +1,7 @@
 <?php
 
+use Gregwar\Cache\Cache;
+use Gregwar\Cache\CacheInterface;
 use Gregwar\Image\Image;
 use Gregwar\Image\ImageColor;
 
@@ -121,9 +123,9 @@ class ImageTests extends \PHPUnit\Framework\TestCase
     public function testCustomCacheSystem()
     {
         $image = $this->open('monalisa.jpg');
-        $cache = $this->createMock('Gregwar\Cache\CacheInterface');
+        $cache = new Cache();
         $image->setCacheSystem($cache);
-        $this->assertTrue($image->getCacheSystem() instanceof Gregwar\Cache\CacheInterface);
+        $this->assertEquals($image->getCacheSystem(), $cache);
     }
 
     /**
