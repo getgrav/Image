@@ -1,5 +1,5 @@
 {
-    "name": "getgrav/gregwar-image",
+    "name": "getgrav/image",
     "description": "Image handling",
     "keywords": ["image", "gd"],
     "homepage": "https://github.com/Gregwar/Image",
