@@ -13,7 +13,7 @@
         {
             "name": "Grav CMS",
             "email": "hello@getgrav.org",
-            "homepage": "https://getgrav.org",
+            "homepage": "https://getgrav.org"
         }
     ],
     "require": {
