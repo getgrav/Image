@@ -534,7 +534,7 @@ class Image
          $inputRelativePath = substr($this->source->getInfos(), strlen(getcwd()) + 1);
 
         $datas = array(
-            inputRelativePath,
+            $inputRelativePath,
             $this->serializeOperations(),
             $type,
             $quality,
