@@ -63,8 +63,9 @@ class GD extends Common
     
     public function __destruct()
     {
-        if (!$this->resource)
+        if ($this->resource) {
             imagedestroy($this->resource);
+        }
     }
 
     /**
