@@ -92,6 +92,13 @@ interface AdapterInterface
     public function saveWebp($file, $quality);
 
     /**
+     * Save the image as a AVIF.
+     *
+     * @return $this
+     */
+    public function saveAvif($file, $quality);
+
+    /**
      * Save the image as a jpeg.
      *
      * @param string $file

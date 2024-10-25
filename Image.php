@@ -22,6 +22,8 @@ use Gregwar\Image\Source\Source;
  * @method Image saveGif($file)
  * @method Image savePng($file)
  * @method Image saveJpeg($file, $quality)
+ * @method Image saveWebP($file, $quality)
+ * @method Image saveAvif($file, $quality)
  * @method Image resize($width = null, $height = null, $background = 'transparent', $force = false, $rescale = false, $crop = false)
  * @method Image forceResize($width = null, $height = null, $background = 'transparent')
  * @method Image scaleResize($width = null, $height = null, $background = 'transparent', $crop = false)
@@ -111,6 +113,7 @@ class Image
         'jpg'   => 'jpeg',
         'jpeg'  => 'jpeg',
         'webp'  => 'webp',
+        'avif'  => 'avif',
         'png'   => 'png',
         'gif'   => 'gif',
     );
@@ -703,6 +706,14 @@ class Image
     }
 
     /**
+     * Generates and output a webp cached file.
+     */
+    public function avif($quality = 80)
+    {
+        return $this->cacheFile('avif', $quality);
+    }
+
+    /**
      * Generates and output an image using the same type as input.
      *
      * @param int $quality
@@ -821,6 +832,10 @@ class Image
 
             if ($type === 'webp') {
                 $success = $this->getAdapter()->saveWebP($file, $quality);
+            }
+
+            if ($type == 'avif') {
+                $success = $this->getAdapter()->saveAvif($file, $quality);
             }
 
             if (!$success) {
