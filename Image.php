@@ -409,6 +409,7 @@ class Image
      * Get the file path.
      *
      * @return string|null a string with the filename, null if the image does not depends on a file
+     *               does not depend on a file
      */
     public function getFilePath()
     {
@@ -560,7 +561,7 @@ class Image
     }
 
     /**
-     * Gets the cache file name and generate it if it does not exists.
+     * Gets the cache file name and generate it if it does not exist.
      * Note that if it exists, all the image computation process will
      * not be done.
      *
@@ -600,7 +601,7 @@ class Image
 
         $cacheFile .= '.'.$type;
 
-        // If the files does not exists, save it
+        // If the file does not exist, save it
         $image = $this;
 
         // Target file should be younger than all the current image

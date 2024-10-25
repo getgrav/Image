@@ -153,9 +153,9 @@ abstract class Common extends Adapter
      *
      * @return $this
      */
-    public function applyExifOrientation($exif_orienation)
+    public function applyExifOrientation($exif_orientation)
     {
-        switch ($exif_orienation) {
+        switch ($exif_orientation) {
             case 1:
                 break;
 
@@ -393,7 +393,7 @@ abstract class Common extends Adapter
     }
 
     /**
-     * Trim background color arround the image.
+     * Trim background color around the image.
      *
      * @param string|int $background the background
      *
