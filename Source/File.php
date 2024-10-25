@@ -3,6 +3,7 @@
 namespace Gregwar\Image\Source;
 
 use Gregwar\Image\Image;
+use Gregwar\Image\Utils\FileUtils;
 
 /**
  * Open an image from a file.
@@ -47,7 +48,7 @@ class File extends Source
      */
     public function guessType()
     {
-        if (function_exists('exif_imagetype')) {
+        if (function_exists('exif_imagetype') && FileUtils::safeExists($this->file)) {
             $type = @exif_imagetype($this->file);
 
             if (false !== $type) {

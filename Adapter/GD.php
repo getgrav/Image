@@ -4,6 +4,7 @@ namespace Gregwar\Image\Adapter;
 
 use Gregwar\Image\Image;
 use Gregwar\Image\ImageColor;
+use Gregwar\Image\Utils\FileUtils;
 
 class GD extends Common
 {
@@ -644,7 +645,7 @@ class GD extends Common
      */
     protected function openJpeg($file)
     {
-        if (file_exists($file) && filesize($file)) {
+        if (FileUtils::safeExists($file) && filesize($file)) {
             $this->resource = @imagecreatefromjpeg($file);
         } else {
             $this->resource = false;
@@ -660,7 +661,7 @@ class GD extends Common
      */
     protected function openGif($file)
     {
-        if (file_exists($file) && filesize($file)) {
+        if (FileUtils::safeExists($file) && filesize($file)) {
             $this->resource = @imagecreatefromgif($file);
         } else {
             $this->resource = false;
@@ -676,7 +677,7 @@ class GD extends Common
      */
     protected function openPng($file)
     {
-        if (file_exists($file) && filesize($file)) {
+        if (FileUtils::safeExists($file) && filesize($file)) {
             $this->resource = @imagecreatefrompng($file);
         } else {
             $this->resource = false;
@@ -692,7 +693,7 @@ class GD extends Common
      */
     protected function openWebp($file)
     {
-        if (file_exists($file) && filesize($file)) {
+        if (FileUtils::safeExists($file) && filesize($file)) {
             $this->resource = @imagecreatefromwebp($file);
         } else {
             $this->resource = false;

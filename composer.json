@@ -1,7 +1,10 @@
 {
     "name": "getgrav/image",
     "description": "Image handling",
-    "keywords": ["image", "gd"],
+    "keywords": [
+        "image",
+        "gd"
+    ],
     "homepage": "https://github.com/Gregwar/Image",
     "license": "MIT",
     "authors": [
@@ -17,13 +20,13 @@
         }
     ],
     "require": {
-        "php": "^5.6 || ^7.0 || ^8.0",
+        "php": "^7.2 || ^8.0",
         "ext-gd": "*",
         "getgrav/cache": "^2.0"
     },
     "require-dev": {
         "sllh/php-cs-fixer-styleci-bridge": "~1.0",
-        "symfony/phpunit-bridge": "^2.7.4 || ^3.0"
+        "phpunit/phpunit": "^9"
     },
     "suggest": {
         "behat/transliterator": "Transliterator provides ability to set non-latin1 pretty names"
@@ -33,5 +36,8 @@
         "psr-0": {
             "Gregwar\\Image": ""
         }
+    },
+    "scripts": {
+        "test": "./vendor/bin/phpunit --version && ./vendor/bin/phpunit -c phpunit.xml.dist"
     }
 }
