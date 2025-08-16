@@ -377,6 +377,7 @@ class Image
     /**
      * @param AdapterInterface|string $adapter
      * @throws \Exception
+     * @return $this
      */
     public function setAdapter($adapter)
     {
@@ -403,6 +404,8 @@ class Image
         }
 
         $this->adapter->setSource($this->source);
+        
+        return $this;
     }
 
     /**

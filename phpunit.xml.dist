@@ -13,6 +13,8 @@
     <testsuites>
         <testsuite name="Image testing">
             <file>./tests/ImageTests.php</file>
+            <file>./tests/ImagickTests.php</file>
+            <file>./tests/AdapterComparisonTests.php</file>
         </testsuite>
     </testsuites>
 

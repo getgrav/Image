@@ -3,12 +3,30 @@
 namespace Gregwar\Image\Adapter;
 
 use Gregwar\Image\Image;
+use Gregwar\Image\ImageColor;
+use Gregwar\Image\Utils\FileUtils;
 
 class Imagick extends Common
 {
+    /**
+     * @var \Imagick
+     */
+    protected $resource;
+
     public function __construct()
     {
-        throw new \Exception('Imagick is not supported right now');
+        parent::__construct();
+
+        if (!extension_loaded('imagick')) {
+            throw new \RuntimeException('You need to install ImageMagick PHP Extension to use this library');
+        }
+    }
+
+    public function __destruct()
+    {
+        if ($this->resource instanceof \Imagick) {
+            $this->resource->destroy();
+        }
     }
 
     /**
@@ -28,7 +46,11 @@ class Imagick extends Common
      */
     public function width()
     {
-        // TODO: Implement width() method.
+        if (null === $this->resource) {
+            $this->init();
+        }
+
+        return $this->resource->getImageWidth();
     }
 
     /**
@@ -38,7 +60,11 @@ class Imagick extends Common
      */
     public function height()
     {
-        // TODO: Implement height() method.
+        if (null === $this->resource) {
+            $this->init();
+        }
+
+        return $this->resource->getImageHeight();
     }
 
     /**
@@ -48,7 +74,10 @@ class Imagick extends Common
      */
     public function saveGif($file)
     {
-        // TODO: Implement saveGif() method.
+        $this->resource->setImageFormat('gif');
+        $this->resource->writeImage($file);
+
+        return $this;
     }
 
     /**
@@ -58,7 +87,10 @@ class Imagick extends Common
      */
     public function savePng($file)
     {
-        // TODO: Implement savePng() method.
+        $this->resource->setImageFormat('png');
+        $this->resource->writeImage($file);
+
+        return $this;
     }
 
     /**
@@ -68,7 +100,39 @@ class Imagick extends Common
      */
     public function saveJpeg($file, $quality)
     {
-        // TODO: Implement saveJpeg() method.
+        $this->resource->setImageFormat('jpeg');
+        $this->resource->setImageCompressionQuality($quality);
+        $this->resource->writeImage($file);
+
+        return $this;
+    }
+
+    /**
+     * Save the image as a webp.
+     *
+     * @return $this
+     */
+    public function saveWebp($file, $quality)
+    {
+        $this->resource->setImageFormat('webp');
+        $this->resource->setImageCompressionQuality($quality);
+        $this->resource->writeImage($file);
+
+        return $this;
+    }
+
+    /**
+     * Save the image as a avif.
+     *
+     * @return $this
+     */
+    public function saveAvif($file, $quality)
+    {
+        $this->resource->setImageFormat('avif');
+        $this->resource->setImageCompressionQuality($quality);
+        $this->resource->writeImage($file);
+
+        return $this;
     }
 
     /**
@@ -83,7 +147,10 @@ class Imagick extends Common
      */
     public function crop($x, $y, $width, $height)
     {
-        // TODO: Implement crop() method.
+        $this->resource->cropImage($width, $height, $x, $y);
+        $this->resource->setImagePage(0, 0, 0, 0);
+
+        return $this;
     }
 
     /**
@@ -95,7 +162,20 @@ class Imagick extends Common
      */
     public function fillBackground($background = 0xffffff)
     {
-        // TODO: Implement fillBackground() method.
+        $width = $this->width();
+        $height = $this->height();
+        
+        $backgroundColor = new \ImagickPixel();
+        $backgroundColor->setColor($this->getImagickColor($background));
+        
+        $newImage = new \Imagick();
+        $newImage->newImage($width, $height, $backgroundColor);
+        $newImage->compositeImage($this->resource, \Imagick::COMPOSITE_OVER, 0, 0);
+        
+        $this->resource->destroy();
+        $this->resource = $newImage;
+
+        return $this;
     }
 
     /**
@@ -105,7 +185,9 @@ class Imagick extends Common
      */
     public function negate()
     {
-        // TODO: Implement negate() method.
+        $this->resource->negateImage(false);
+
+        return $this;
     }
 
     /**
@@ -117,7 +199,9 @@ class Imagick extends Common
      */
     public function brightness($brightness)
     {
-        // TODO: Implement brightness() method.
+        $this->resource->modulateImage(100 + $brightness, 100, 100);
+
+        return $this;
     }
 
     /**
@@ -129,7 +213,9 @@ class Imagick extends Common
      */
     public function contrast($contrast)
     {
-        // TODO: Implement contrast() method.
+        $this->resource->contrastImage($contrast > 0);
+
+        return $this;
     }
 
     /**
@@ -139,7 +225,9 @@ class Imagick extends Common
      */
     public function grayscale()
     {
-        // TODO: Implement grayscale() method.
+        $this->resource->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
+
+        return $this;
     }
 
     /**
@@ -149,7 +237,9 @@ class Imagick extends Common
      */
     public function emboss()
     {
-        // TODO: Implement emboss() method.
+        $this->resource->embossImage(0, 1);
+
+        return $this;
     }
 
     /**
@@ -161,7 +251,9 @@ class Imagick extends Common
      */
     public function smooth($p)
     {
-        // TODO: Implement smooth() method.
+        $this->resource->blurImage(abs($p), abs($p));
+
+        return $this;
     }
 
     /**
@@ -171,7 +263,9 @@ class Imagick extends Common
      */
     public function sharp()
     {
-        // TODO: Implement sharp() method.
+        $this->resource->sharpenImage(0, 1);
+
+        return $this;
     }
 
     /**
@@ -181,7 +275,9 @@ class Imagick extends Common
      */
     public function edge()
     {
-        // TODO: Implement edge() method.
+        $this->resource->edgeImage(1);
+
+        return $this;
     }
 
     /**
@@ -195,7 +291,10 @@ class Imagick extends Common
      */
     public function colorize($red, $green, $blue)
     {
-        // TODO: Implement colorize() method.
+        $color = sprintf('rgb(%d,%d,%d)', $red, $green, $blue);
+        $this->resource->colorizeImage($color, 1);
+
+        return $this;
     }
 
     /**
@@ -205,7 +304,9 @@ class Imagick extends Common
      */
     public function sepia()
     {
-        // TODO: Implement sepia() method.
+        $this->resource->sepiaToneImage(80);
+
+        return $this;
     }
 
     /**
@@ -221,7 +322,19 @@ class Imagick extends Common
      */
     public function merge(Image $other, $x = 0, $y = 0, $width = null, $height = null)
     {
-        // TODO: Implement merge() method.
+        $other = clone $other;
+        $other->init();
+        $other->applyOperations();
+        
+        $otherResource = $other->getAdapter()->getResource();
+        
+        if ($width !== null && $height !== null) {
+            $otherResource->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1);
+        }
+        
+        $this->resource->compositeImage($otherResource, \Imagick::COMPOSITE_OVER, $x, $y);
+
+        return $this;
     }
 
     /**
@@ -234,7 +347,12 @@ class Imagick extends Common
      */
     public function rotate($angle, $background = 0xffffff)
     {
-        // TODO: Implement rotate() method.
+        $backgroundColor = new \ImagickPixel();
+        $backgroundColor->setColor($this->getImagickColor($background));
+        
+        $this->resource->rotateImage($backgroundColor, $angle);
+
+        return $this;
     }
 
     /**
@@ -248,7 +366,12 @@ class Imagick extends Common
      */
     public function fill($color = 0xffffff, $x = 0, $y = 0)
     {
-        // TODO: Implement fill() method.
+        $fillColor = new \ImagickPixel();
+        $fillColor->setColor($this->getImagickColor($color));
+        
+        $this->resource->floodfillPaintImage($fillColor, 0, $fillColor, $x, $y, false);
+
+        return $this;
     }
 
     /**
@@ -265,7 +388,28 @@ class Imagick extends Common
      */
     public function write($font, $text, $x = 0, $y = 0, $size = 12, $angle = 0, $color = 0x000000, $align = 'left')
     {
-        // TODO: Implement write() method.
+        $draw = new \ImagickDraw();
+        
+        $textColor = new \ImagickPixel();
+        $textColor->setColor($this->getImagickColor($color));
+        
+        $draw->setFillColor($textColor);
+        $draw->setFont($font);
+        $draw->setFontSize($size);
+        
+        if ($align !== 'left') {
+            $metrics = $this->resource->queryFontMetrics($draw, $text);
+            
+            if ($align === 'center') {
+                $x -= $metrics['textWidth'] / 2;
+            } elseif ($align === 'right') {
+                $x -= $metrics['textWidth'];
+            }
+        }
+        
+        $this->resource->annotateImage($draw, $x, $y, $angle, $text);
+
+        return $this;
     }
 
     /**
@@ -282,7 +426,22 @@ class Imagick extends Common
      */
     public function rectangle($x1, $y1, $x2, $y2, $color, $filled = false)
     {
-        // TODO: Implement rectangle() method.
+        $draw = new \ImagickDraw();
+        
+        $drawColor = new \ImagickPixel();
+        $drawColor->setColor($this->getImagickColor($color));
+        
+        if ($filled) {
+            $draw->setFillColor($drawColor);
+        } else {
+            $draw->setStrokeColor($drawColor);
+            $draw->setFillOpacity(0);
+        }
+        
+        $draw->rectangle($x1, $y1, $x2, $y2);
+        $this->resource->drawImage($draw);
+
+        return $this;
     }
 
     /**
@@ -300,7 +459,22 @@ class Imagick extends Common
      */
     public function roundedRectangle($x1, $y1, $x2, $y2, $radius, $color, $filled = false)
     {
-        // TODO: Implement roundedRectangle() method.
+        $draw = new \ImagickDraw();
+        
+        $drawColor = new \ImagickPixel();
+        $drawColor->setColor($this->getImagickColor($color));
+        
+        if ($filled) {
+            $draw->setFillColor($drawColor);
+        } else {
+            $draw->setStrokeColor($drawColor);
+            $draw->setFillOpacity(0);
+        }
+        
+        $draw->roundRectangle($x1, $y1, $x2, $y2, $radius, $radius);
+        $this->resource->drawImage($draw);
+
+        return $this;
     }
 
     /**
@@ -316,7 +490,16 @@ class Imagick extends Common
      */
     public function line($x1, $y1, $x2, $y2, $color = 0x000000)
     {
-        // TODO: Implement line() method.
+        $draw = new \ImagickDraw();
+        
+        $drawColor = new \ImagickPixel();
+        $drawColor->setColor($this->getImagickColor($color));
+        
+        $draw->setStrokeColor($drawColor);
+        $draw->line($x1, $y1, $x2, $y2);
+        $this->resource->drawImage($draw);
+
+        return $this;
     }
 
     /**
@@ -333,7 +516,22 @@ class Imagick extends Common
      */
     public function ellipse($cx, $cy, $width, $height, $color = 0x000000, $filled = false)
     {
-        // TODO: Implement ellipse() method.
+        $draw = new \ImagickDraw();
+        
+        $drawColor = new \ImagickPixel();
+        $drawColor->setColor($this->getImagickColor($color));
+        
+        if ($filled) {
+            $draw->setFillColor($drawColor);
+        } else {
+            $draw->setStrokeColor($drawColor);
+            $draw->setFillOpacity(0);
+        }
+        
+        $draw->ellipse($cx, $cy, $width / 2, $height / 2, 0, 360);
+        $this->resource->drawImage($draw);
+
+        return $this;
     }
 
     /**
@@ -349,7 +547,7 @@ class Imagick extends Common
      */
     public function circle($cx, $cy, $r, $color = 0x000000, $filled = false)
     {
-        // TODO: Implement circle() method.
+        return $this->ellipse($cx, $cy, $r * 2, $r * 2, $color, $filled);
     }
 
     /**
@@ -363,7 +561,27 @@ class Imagick extends Common
      */
     public function polygon(array $points, $color, $filled = false)
     {
-        // TODO: Implement polygon() method.
+        $draw = new \ImagickDraw();
+        
+        $drawColor = new \ImagickPixel();
+        $drawColor->setColor($this->getImagickColor($color));
+        
+        if ($filled) {
+            $draw->setFillColor($drawColor);
+        } else {
+            $draw->setStrokeColor($drawColor);
+            $draw->setFillOpacity(0);
+        }
+        
+        $coordinates = array();
+        for ($i = 0; $i < count($points); $i += 2) {
+            $coordinates[] = array('x' => $points[$i], 'y' => $points[$i + 1]);
+        }
+        
+        $draw->polygon($coordinates);
+        $this->resource->drawImage($draw);
+
+        return $this;
     }
 
     /**
@@ -371,7 +589,15 @@ class Imagick extends Common
      */
     public function flip($flipVertical, $flipHorizontal)
     {
-        // TODO: Implement flip method
+        if ($flipVertical) {
+            $this->resource->flipImage();
+        }
+        
+        if ($flipHorizontal) {
+            $this->resource->flopImage();
+        }
+
+        return $this;
     }
 
     /**
@@ -379,22 +605,47 @@ class Imagick extends Common
      */
     protected function openGif($file)
     {
-        // TODO: Implement openGif() method.
+        if (FileUtils::safeExists($file) && filesize($file)) {
+            $this->resource = new \Imagick($file);
+        } else {
+            $this->resource = false;
+        }
     }
 
     protected function openJpeg($file)
     {
-        // TODO: Implement openJpeg() method.
+        if (FileUtils::safeExists($file) && filesize($file)) {
+            $this->resource = new \Imagick($file);
+        } else {
+            $this->resource = false;
+        }
     }
 
     protected function openPng($file)
     {
-        // TODO: Implement openPng() method.
+        if (FileUtils::safeExists($file) && filesize($file)) {
+            $this->resource = new \Imagick($file);
+        } else {
+            $this->resource = false;
+        }
     }
 
     protected function openWebp($file)
     {
-        // TODO: Implement openWebp() method.
+        if (FileUtils::safeExists($file) && filesize($file)) {
+            $this->resource = new \Imagick($file);
+        } else {
+            $this->resource = false;
+        }
+    }
+
+    protected function openAvif($file)
+    {
+        if (FileUtils::safeExists($file) && filesize($file)) {
+            $this->resource = new \Imagick($file);
+        } else {
+            $this->resource = false;
+        }
     }
 
     /**
@@ -402,7 +653,9 @@ class Imagick extends Common
      */
     protected function createImage($width, $height)
     {
-        // TODO: Implement createImage() method.
+        $this->resource = new \Imagick();
+        $this->resource->newImage($width, $height, new \ImagickPixel('transparent'));
+        $this->resource->setImageFormat('png');
     }
 
     /**
@@ -410,7 +663,8 @@ class Imagick extends Common
      */
     protected function createImageFromData($data)
     {
-        // TODO: Implement createImageFromData() method.
+        $this->resource = new \Imagick();
+        $this->resource->readImageBlob($data);
     }
 
     /**
@@ -419,7 +673,29 @@ class Imagick extends Common
      */
     protected function doResize($bg, int $target_width, int $target_height, int $new_width, int $new_height)
     {
-        // TODO: Implement doResize() method.
+        $this->resource->resizeImage($new_width, $new_height, \Imagick::FILTER_LANCZOS, 1);
+        
+        if ($target_width !== $new_width || $target_height !== $new_height) {
+            $newImage = new \Imagick();
+            
+            if ($bg !== 'transparent') {
+                $backgroundColor = new \ImagickPixel();
+                $backgroundColor->setColor($this->getImagickColor($bg));
+                $newImage->newImage($target_width, $target_height, $backgroundColor);
+            } else {
+                $newImage->newImage($target_width, $target_height, new \ImagickPixel('transparent'));
+            }
+            
+            $x = (int) (($target_width - $new_width) / 2);
+            $y = (int) (($target_height - $new_height) / 2);
+            
+            $newImage->compositeImage($this->resource, \Imagick::COMPOSITE_OVER, $x, $y);
+            
+            $this->resource->destroy();
+            $this->resource = $newImage;
+        }
+
+        return $this;
     }
 
     /**
@@ -427,6 +703,61 @@ class Imagick extends Common
      */
     protected function getColor($x, $y)
     {
-        // TODO: Implement getColor() method.
+        $pixel = $this->resource->getImagePixelColor($x, $y);
+        $colors = $pixel->getColor();
+        
+        return ($colors['r'] << 16) | ($colors['g'] << 8) | $colors['b'];
+    }
+
+    /**
+     * Convert color to ImageMagick format.
+     *
+     * @param int|string $color
+     * @return string
+     */
+    protected function getImagickColor($color)
+    {
+        if (is_string($color)) {
+            return $color;
+        }
+        
+        if ($color === 'transparent') {
+            return 'transparent';
+        }
+        
+        $red = ($color >> 16) & 0xFF;
+        $green = ($color >> 8) & 0xFF;
+        $blue = $color & 0xFF;
+        
+        return sprintf('rgb(%d,%d,%d)', $red, $green, $blue);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function enableProgressive()
+    {
+        $this->resource->setImageInterlaceScheme(\Imagick::INTERLACE_PLANE);
+
+        return $this;
+    }
+
+    /**
+     * Does this adapter supports type ?
+     *
+     * @param string $type
+     * @return bool
+     */
+    protected function supports($type)
+    {
+        try {
+            // Create a temporary Imagick instance to query formats
+            $imagick = new \Imagick();
+            $formats = $imagick->queryFormats(strtoupper($type));
+            $imagick->destroy();
+            return !empty($formats);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }
