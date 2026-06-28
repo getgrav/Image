@@ -62,6 +62,43 @@ class ImageTests extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * A plain resize must never enlarge the source: asking for a box bigger
+     * than the image returns it at its natural size rather than padding the
+     * un-enlarged image onto an oversized canvas (getgrav/grav#4173).
+     */
+    public function testResizeLargerThanSourceDoesNotUpscale(): void
+    {
+        [$srcWidth, $srcHeight] = getimagesize(__DIR__ . '/files/monalisa.jpg');
+
+        $out = $this->output('monalisa_noupscale.jpg');
+        $this->open('monalisa.jpg')
+            ->resize($srcWidth * 3, $srcHeight * 3)
+            ->save($out)
+            ;
+
+        $i = imagecreatefromjpeg($out);
+        self::assertSame($srcWidth, imagesx($i));
+        self::assertSame($srcHeight, imagesy($i));
+    }
+
+    /**
+     * forceResize() is the explicit-upscale entry point and must still enlarge
+     * past the source dimensions.
+     */
+    public function testForceResizeStillUpscales(): void
+    {
+        $out = $this->output('monalisa_forced.jpg');
+        $this->open('monalisa.jpg')
+            ->forceResize(2000, 2400)
+            ->save($out)
+            ;
+
+        $i = imagecreatefromjpeg($out);
+        self::assertSame(2000, imagesx($i));
+        self::assertSame(2400, imagesy($i));
+    }
+
+    /**
      * Testing to create an image, jpeg, gif and png.
      */
     public function testCreateImage(): void

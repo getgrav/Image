@@ -347,6 +347,23 @@ abstract class Common extends Adapter
             $height = round($current_height * ((float) $matches[1] / 100.0));
         }
 
+        // Don't enlarge on a plain resize. When the requested box is larger
+        // than the source in a given axis, the scale logic below never upscales
+        // the pixels, yet a canvas is still built at the requested size and the
+        // un-enlarged image is padded with the background colour (a white
+        // border on JPEGs, which have no transparency). Cap the request to the
+        // source so the image is returned at its natural size instead. The
+        // explicit-upscale entry points — forceResize() ($force) and
+        // scaleResize() ($rescale) — are untouched and still enlarge on demand.
+        if (!$force && !$rescale && !$crop) {
+            if ($width !== null && $width > $current_width) {
+                $width = $current_width;
+            }
+            if ($height !== null && $height > $current_height) {
+                $height = $current_height;
+            }
+        }
+
         if (!$rescale && (!$force || $crop)) {
             if ($width !== null && $current_width > $width) {
                 $scale = $current_width / $width;
