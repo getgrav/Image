@@ -25,7 +25,6 @@
         "getgrav/cache": "^2.0"
     },
     "require-dev": {
-        "sllh/php-cs-fixer-styleci-bridge": "~1.0",
         "phpunit/phpunit": "^9"
     },
     "suggest": {
