@@ -536,16 +536,21 @@ class Image
     {
          $inputRelativePath = substr($this->source->getInfos(), strlen(getcwd()) + 1);
 
-        // Include the source file's modification time in the hash. A File source
-        // only reports its path via getInfos(), so replacing an image in place
-        // (same path, new content) would otherwise reuse the previously cached
-        // derivative and keep serving the old image. Data and Create sources
-        // already encode their content in getInfos(), so they need nothing extra.
-        $modified = $this->source instanceof File ? @filemtime($this->source->getInfos()) : null;
+        // Include the source file's modification time and size in the hash. A
+        // File source only reports its path via getInfos(), so replacing an image
+        // in place (same path, new content) would otherwise reuse the previously
+        // cached derivative and keep serving the old image. Size guards against
+        // the rare case where a replacement preserves the original mtime. Data and
+        // Create sources already encode their content in getInfos(), so they need
+        // nothing extra.
+        $file = $this->source instanceof File ? $this->source->getInfos() : null;
+        $modified = $file !== null ? @filemtime($file) : null;
+        $size = $file !== null ? @filesize($file) : null;
 
         $datas = array(
             $inputRelativePath,
             $modified,
+            $size,
             $this->serializeOperations(),
             $type,
             $quality,
