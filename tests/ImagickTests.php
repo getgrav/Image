@@ -178,6 +178,35 @@ class ImagickTests extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * AVIF quality must affect the encoded output, not just image metadata.
+     */
+    public function testSaveAvifHonorsQuality(): void
+    {
+        if (!\Imagick::queryFormats('AVIF')) {
+            self::markTestSkipped('AVIF format not supported by this ImageMagick build.');
+        }
+
+        $files = [];
+        foreach ([20, 90] as $quality) {
+            $out = $this->output('monalisa_quality_'.$quality.'.avif');
+            $this->openImagick('monalisa.jpg')->resize(100, 100)->save($out, 'avif', $quality);
+            self::assertFileExists($out);
+
+            $decoded = new \Imagick($out);
+            self::assertSame(100, $decoded->getImageWidth());
+            self::assertSame(100, $decoded->getImageHeight());
+            $decoded->clear();
+            $files[$quality] = $out;
+        }
+
+        self::assertLessThan(
+            filesize($files[90]),
+            filesize($files[20]),
+            'Lower quality should produce a smaller AVIF for the photographic fixture.'
+        );
+    }
+
+    /**
      * Testing image effects with Imagick.
      */
     public function testEffectsImagick(): void

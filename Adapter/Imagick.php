@@ -129,7 +129,7 @@ class Imagick extends Common
     public function saveAvif($file, $quality)
     {
         $this->resource->setImageFormat('avif');
-        $this->resource->setImageCompressionQuality($quality);
+        $this->resource->setCompressionQuality($quality);
         $this->resource->writeImage($file);
 
         return $this;
