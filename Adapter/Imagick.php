@@ -129,7 +129,12 @@ class Imagick extends Common
     public function saveAvif($file, $quality)
     {
         $this->resource->setImageFormat('avif');
+        // The HEIC/AVIF coder reads image_info->quality (setCompressionQuality),
+        // not image->quality (setImageCompressionQuality) -- ImageMagick 6 and 7
+        // alike. Set both so introspection stays honest and a later save on the
+        // same wand cannot inherit this value as a PNG zlib level.
         $this->resource->setCompressionQuality($quality);
+        $this->resource->setImageCompressionQuality($quality);
         $this->resource->writeImage($file);
 
         return $this;
