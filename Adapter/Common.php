@@ -2,6 +2,7 @@
 
 namespace Gregwar\Image\Adapter;
 
+use Gregwar\Image\Image;
 use Gregwar\Image\Source\Create;
 use Gregwar\Image\Source\Data;
 use Gregwar\Image\Source\File;
@@ -87,6 +88,59 @@ abstract class Common extends Adapter
         $this->crop($xPos, $yPos, $width, $height);
 
         return $this;
+    }
+
+    /**
+     * Stamps another image on this one, scaled to fit a share of this image
+     * and placed on a 3x3 grid. Unlike merge(), the size and place are worked
+     * out when the operation runs, against the image as it is by then, so a
+     * resize or crop queued before it is taken into account.
+     *
+     * @param Image        $other    the stamp, never enlarged
+     * @param string       $position "<top|center|bottom>-<left|center|right>"
+     * @param float|string $scale    the share of this image the stamp may fill, 0 to 1
+     *
+     * @return $this
+     */
+    public function watermark(Image $other, $position = 'center-center', $scale = 1.0)
+    {
+        $width = $this->width();
+        $height = $this->height();
+        $scale = min(1.0, (float) $scale);
+
+        $stamp = clone $other;
+        $stamp->init();
+        $stamp->applyOperations();
+        $ratio = min(1.0, $width * $scale / $stamp->width(), $height * $scale / $stamp->height());
+        if ($ratio <= 0) {
+            return $this;
+        }
+
+        $stampWidth = max(1, (int) round($stamp->width() * $ratio));
+        $stampHeight = max(1, (int) round($stamp->height() * $ratio));
+
+        $parts = explode('-', (string) $position, 2);
+        $vertical = $parts[0];
+        $horizontal = isset($parts[1]) ? $parts[1] : 'center';
+
+        $x = intdiv($width - $stampWidth, 2);
+        if ($horizontal === 'left') {
+            $x = 0;
+        } elseif ($horizontal === 'right') {
+            $x = $width - $stampWidth;
+        }
+
+        $y = intdiv($height - $stampHeight, 2);
+        if ($vertical === 'top') {
+            $y = 0;
+        } elseif ($vertical === 'bottom') {
+            $y = $height - $stampHeight;
+        }
+
+        $other = clone $other;
+        $other->forceResize($stampWidth, $stampHeight);
+
+        return $this->merge($other, $x, $y);
     }
 
     /**
